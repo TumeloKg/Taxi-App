@@ -2,6 +2,7 @@ package com.example.taxi;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
@@ -9,11 +10,9 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -31,33 +30,52 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class DriverMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location. LocationListener {
+public class CustomerMapActivity  extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location. LocationListener {
 
     private GoogleMap mMap;
     GoogleApiClient mGoogleApiClient;
     Location mLastLocation;
     LocationRequest mLocationRequest;
 
-    private Button nLogout;
+    private Button nLogout, nRequest;
+
+    private LatLng pickupLocation;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_driver_map);
+        setContentView(R.layout.activity_customer_map);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
 
+        //Request Taxi button
+        nRequest = (Button) findViewById(R.id.request_btn);
+        nRequest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("customerRequest");
+                GeoFire geofire = new GeoFire(ref);
+                geofire.setLocation(userId, new GeoLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+
+                pickupLocation = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                mMap.addMarker(new MarkerOptions().position(pickupLocation).title("Pick Up Here"));
+
+                nRequest.setText("Getting your Taxi...");
+            }
+        });
         //logout button
         nLogout = (Button) findViewById(R.id.logout_btn);
         nLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 FirebaseAuth.getInstance().signOut();
-                Intent intent = new Intent(DriverMapActivity.this, MainActivity.class);
+                Intent intent = new Intent(CustomerMapActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
                 return;
@@ -104,11 +122,7 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
         mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
 
 
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("driversAvailable");
 
-        GeoFire geoFire = new GeoFire(ref);
-        geoFire.setLocation(userId, new GeoLocation(location.getLatitude(), location.getLongitude()));
 
     }
 
@@ -140,11 +154,7 @@ public class DriverMapActivity extends FragmentActivity implements OnMapReadyCal
     @Override
     protected void onStop() {
         super.onStop();
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("driversAvailable");
 
-        GeoFire geoFire = new GeoFire(ref);
-        geoFire.removeLocation(userId);
     }
 
     //    final int LOCATION_REQUEST_CODE = 1;
