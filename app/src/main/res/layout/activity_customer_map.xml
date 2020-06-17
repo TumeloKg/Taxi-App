@@ -7,12 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/logout_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Logout"
-        />
+
 
     <fragment
         android:id="@+id/map"
@@ -20,11 +15,25 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
+
+    <Button
+        android:id="@+id/logout_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Logout"
+        android:layout_margin="10dp"
+        android:textColor="#ffffff"
+        android:background="@drawable/custom_button"
+        />
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Call Taxi"
         android:id="@+id/request_btn"
-        android:layout_gravity="bottom"/>
+        android:layout_gravity="bottom"
+        android:layout_margin="10dp"
+        android:textColor="#ffffff"
+        android:background="@drawable/custom_button"/>
 
 </FrameLayout>
